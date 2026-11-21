@@ -1,0 +1,991 @@
+# MASTER QA PROMPT: AUTONOMOUS TESTING, LIVE MARKET DATA VERIFICATION, BUG DETECTION AND AUTOMATIC FIXING LOOP
+
+You are now acting as a Senior Software QA Engineer, Full-Stack Developer, Quantitative Trading System Auditor, AI/ML Engineer, Financial Data Engineer, Cybersecurity Tester and Production Reliability Engineer.
+
+You are working inside my EXISTING Google AI Studio project.
+
+Your task is to perform a complete technical audit of the application, test every available feature, verify whether actual live Indian stock market data is being received, identify all problems, fix every fixable issue and repeatedly retest the application until all critical and high-priority problems are resolved.
+
+THIS IS NOT A REQUEST TO BUILD A NEW APPLICATION.
+
+Inspect, test, debug, repair and improve the EXISTING APPLICATION. Preserve its current architecture, working functionality, features and design wherever possible.
+
+Do not simply tell me what is wrong. Fix the actual source code and verify the fix.
+
+==================================================
+PART 1: INITIAL PROJECT INSPECTION
+==================================================
+
+Before changing anything, inspect the complete existing project.
+
+Inspect all files and folders, including:
+
+- Frontend components.
+- Backend services.
+- API routes.
+- Database integrations.
+- Firebase configuration.
+- Gemini integration.
+- AI prediction modules.
+- Market data providers.
+- WebSocket connections.
+- Stock scanner.
+- Technical indicator calculations.
+- Trading strategies.
+- Risk-management engine.
+- Backtesting engine.
+- Paper-trading engine.
+- Broker integrations.
+- Authentication.
+- Environment variables and secret references.
+- Dependencies.
+- Configuration files.
+- Tests.
+- Logging and error handling.
+
+Understand the existing application architecture before modifying code.
+
+Create an internal map of:
+
+1. Which features are fully functional.
+2. Which features are partially implemented.
+3. Which features use demonstration data.
+4. Which features are only UI mockups.
+5. Which API connections are active.
+6. Which integrations are missing.
+7. Which modules are producing errors.
+8. Which parts are not connected to the actual backend.
+
+Do not assume that a feature works simply because its interface is visible.
+
+Preserve the existing code and functionality.
+
+Before significant modifications:
+
+- Use Git/version control if available.
+- Create a safe checkpoint or backup where supported.
+- Never delete existing user data.
+- Never overwrite API secrets.
+- Never unnecessarily replace functional modules.
+- Do not rewrite the entire application simply to resolve a small bug.
+
+==================================================
+PART 2: CREATE AN AUTONOMOUS TESTING LOOP
+==================================================
+
+This is the most important instruction.
+
+Implement and execute the following iterative process.
+
+THE LOOP:
+
+STEP 1: INSPECT
+
+Inspect the entire project and identify potential and actual problems.
+
+STEP 2: TEST
+
+Execute tests for the relevant application components.
+
+STEP 3: DETECT
+
+Identify errors, broken functionality, incorrect outputs, failed integrations, security issues and performance problems.
+
+STEP 4: CLASSIFY
+
+Assign severity:
+
+P0 — Critical:
+- Security breach.
+- Exposure of broker credentials.
+- Accidental real order execution.
+- Incorrect account or position information.
+- Severe financial calculation errors.
+- Application cannot start.
+
+P1 — High:
+- Live market feed not functioning.
+- AI engine not responding.
+- Incorrect trading signals.
+- Incorrect risk calculations.
+- Backtesting producing invalid results.
+- Paper trading malfunction.
+- Database failures.
+- Broken major application workflows.
+
+P2 — Medium:
+- Broken secondary features.
+- Chart issues.
+- Incorrect filters.
+- Data inconsistencies.
+- Notification failures.
+- UI and responsiveness defects.
+
+P3 — Low:
+- Minor visual defects.
+- Unnecessary loading.
+- Poor labels.
+- Small usability improvements.
+
+STEP 5: IDENTIFY ROOT CAUSE
+
+Do not apply random fixes.
+
+Investigate the actual reason for each problem.
+
+Examples:
+
+- Incorrect API endpoint.
+- Missing API credentials.
+- Wrong environment variable.
+- Backend response mismatch.
+- Incorrect React state.
+- Database permission problem.
+- WebSocket reconnection failure.
+- Incorrect market timestamp.
+- Invalid technical indicator calculation.
+- Incorrect stock symbol mapping.
+- Invalid feature engineering.
+- AI model loading error.
+- Calculation error in the backtester.
+- Incorrect order status transition.
+
+STEP 6: FIX
+
+Modify the actual files causing the issue.
+
+Implement the smallest reliable fix that resolves the underlying problem.
+
+Do not use temporary hardcoded values to hide an error.
+
+Do not replace real data with fabricated sample data to make tests pass.
+
+STEP 7: RETEST
+
+Repeat the original failing test.
+
+Also run regression tests to ensure the fix has not broken other modules.
+
+STEP 8: REPEAT
+
+Continue:
+
+INSPECT → TEST → DETECT → CLASSIFY → FIX → RETEST → REGRESSION TEST.
+
+Repeat this process until all fixable P0 and P1 issues are resolved, all critical workflows pass and the application builds successfully.
+
+Allow up to 12 complete repair-and-retest cycles in one execution. If problems remain after 12 cycles, continue only when there is a clear, independent fix that can safely be verified. Otherwise, report the remaining blockers honestly instead of entering an endless loop.
+
+Do not stop after discovering the first error.
+
+Do not stop after merely writing a bug report.
+
+Do not claim an issue is fixed until the relevant test passes.
+
+If a problem cannot be fixed because an external credential, paid service, provider permission or unavailable environment capability is missing, identify it as BLOCKED BY EXTERNAL DEPENDENCY rather than claiming success.
+
+==================================================
+PART 3: VERIFY WHETHER THE APPLICATION USES REAL LIVE MARKET DATA
+==================================================
+
+This is a mandatory and especially important test.
+
+I want you to determine whether the application is actually connected to real Indian stock market data.
+
+DO NOT ASSUME THAT DISPLAYING STOCK PRICES MEANS LIVE DATA IS WORKING.
+
+Trace the entire data path:
+
+MARKET DATA PROVIDER
+→ BACKEND API / WEBSOCKET
+→ DATA VALIDATION
+→ DATA PROCESSING
+→ DATABASE / CACHE
+→ BACKEND RESPONSE
+→ FRONTEND
+→ STOCK CHART
+→ STOCK SCANNER
+→ AI ENGINE.
+
+Inspect the real implementation at every stage.
+
+A. IDENTIFY THE DATA SOURCE
+
+Identify the exact source used for:
+
+- NSE stock prices.
+- BSE stock prices, if supported.
+- NIFTY 50.
+- BANK NIFTY.
+- SENSEX.
+- Historical candles.
+- Live market quotes.
+- Market volume.
+- Stock scanner.
+- AI prediction input data.
+
+For each source, report:
+
+- Provider name.
+- API or WebSocket endpoint.
+- Integration file.
+- Authentication method.
+- Connection status.
+- Last successful response.
+- Latest market-data timestamp.
+- Whether it provides real-time, delayed or historical data.
+- Whether a subscription or API key is required.
+- Whether the data usage is licensed appropriately.
+
+Do not reveal API secrets in the report or logs.
+
+B. CHECK FOR FAKE OR HARDCODED DATA
+
+Search the entire codebase for:
+
+- Math.random().
+- Hardcoded stock prices.
+- Static stock arrays presented as live.
+- Dummy candles.
+- Mock API responses.
+- Fake market indexes.
+- Fixed AI predictions.
+- Placeholder P&L.
+- Sample trading signals.
+- Simulated volume.
+- Default values silently substituted when APIs fail.
+
+Identify all such instances.
+
+Demonstration data is acceptable only when clearly labelled DEMO.
+
+Never allow a mock provider to silently replace a failed real provider.
+
+C. CLASSIFY EACH DATA SOURCE
+
+Use the following data statuses:
+
+LIVE_REALTIME:
+Data is being received from an actual authorised live feed, with current source timestamps and verified freshness.
+
+DELAYED:
+Actual market data is being received, but it is intentionally delayed.
+
+CACHED:
+The application is using previously received market data.
+
+HISTORICAL:
+The application is displaying historical information.
+
+DEMO:
+The displayed information is generated or simulated.
+
+UNAVAILABLE:
+The provider cannot currently provide data.
+
+UNKNOWN:
+The data source cannot be verified.
+
+Show the accurate status in the application.
+
+D. VERIFY LIVE DATA DURING MARKET HOURS
+
+Determine whether the Indian market is currently open.
+
+Use the applicable official exchange trading calendar and confirm weekdays, holidays and special trading sessions.
+
+Verify the normal equity-market session using the current official exchange information.
+
+During an active market session:
+
+1. Establish a real provider connection.
+2. Verify authentication.
+3. Subscribe to supported live symbols.
+4. Receive actual market messages.
+5. Inspect source timestamps.
+6. Check message freshness against the provider's documented update cadence.
+7. Confirm that incoming data updates the backend.
+8. Confirm that updated data reaches the frontend.
+9. Verify that the chart changes with new market data.
+10. Verify that scanner calculations use updated data.
+11. Check that the AI engine receives current feature inputs.
+12. Inspect WebSocket heartbeats and reconnections.
+13. Check for stale quotes.
+14. Check for duplicate ticks.
+15. Check timestamp and time-zone correctness.
+
+Test several liquid instruments where the provider has coverage, for example:
+
+- RELIANCE.
+- HDFCBANK.
+- ICICIBANK.
+- INFY.
+- TCS.
+- NIFTY 50, if supported.
+
+Do not invent symbols or assume that every provider supports all index feeds.
+
+Use actual provider instrument identifiers and its official symbol mapping.
+
+A successful API connection alone is not sufficient proof of live data.
+
+A live feed is verified only when actual provider-originated messages and current source timestamps are established during an active trading session.
+
+E. VERIFY THE LIVE CONNECTION AFTER MARKET HOURS
+
+If the exchange is closed, do not claim that current live trades have been verified.
+
+Instead:
+
+1. Check whether the provider can authenticate.
+2. Check whether WebSocket connection establishment works.
+3. Verify the most recent actual market-data timestamp.
+4. Compare that timestamp with the last applicable trading session.
+5. Verify the official market status.
+6. Test historical-data retrieval.
+7. Verify that old prices are not presented as current live prices.
+8. Check whether data streaming resumes correctly in the next active market session, where a live-session test can be performed.
+
+Show the appropriate status:
+
+- MARKET_CLOSED.
+- FEED_CONNECTED.
+- LAST_DATA_TIMESTAMP.
+- LAST_SESSION_DATA.
+- LIVE_VERIFICATION_PENDING.
+
+Do not describe cached prices as live merely because the API connection exists.
+
+F. VERIFY MARKET DATA ACCURACY
+
+Where suitable authorised comparison sources are available:
+
+- Compare instrument identity.
+- Compare quote timestamps.
+- Compare price values within reasonable source-timing differences.
+- Compare OHLC data.
+- Compare volume.
+- Check missing candles.
+- Check duplicate candles.
+- Check abnormal prices.
+- Check incorrect precision.
+- Check corporate-action handling.
+
+Do not claim perfect agreement between providers when they have different update timestamps.
+
+G. IMPLEMENT A LIVE DATA HEALTH PANEL
+
+Where missing, add a data-health panel to the application.
+
+Display:
+
+- Provider name.
+- Connection status.
+- Market status.
+- Real-time/delayed/demo status.
+- Last update.
+- Last successful heartbeat.
+- Latest source timestamp.
+- Feed latency where measurable.
+- Missing data count.
+- Reconnection count.
+- Data validation status.
+
+Show a clear warning whenever the market feed becomes stale or disconnected.
+
+When real-time data is unavailable, stop generating fresh live trading signals from stale data.
+
+==================================================
+PART 4: TEST EVERY APPLICATION MODULE
+==================================================
+
+Perform actual functional tests across all existing modules.
+
+Do not just check whether each page loads.
+
+4.1 Authentication
+
+Test:
+
+- Login.
+- Logout.
+- Registration, if supported.
+- User sessions.
+- Token expiry.
+- Invalid credentials.
+- Protected pages.
+- User data isolation.
+- Firebase connectivity, if configured.
+
+4.2 Dashboard
+
+Test:
+
+- Market indices.
+- Market status.
+- Top gainers.
+- Top losers.
+- Sector performance.
+- Stock volume.
+- AI summary.
+- Signal feed.
+- Today's P&L.
+- Portfolio values.
+- Loading states.
+- Error states.
+
+Verify that every displayed value comes from the correct data source.
+
+4.3 Stock scanner
+
+Test:
+
+- Stock search.
+- Symbol lookup.
+- Price filters.
+- Volume filters.
+- Relative volume.
+- Momentum.
+- Volatility.
+- RSI.
+- VWAP.
+- Breakout filters.
+- AI probability filters.
+- Sorting.
+- Watchlists.
+- Pagination.
+
+Check that filters return mathematically valid results and that no dummy stock data is being presented as real.
+
+4.4 AI prediction engine
+
+Inspect:
+
+- Model loading.
+- Feature generation.
+- Input validation.
+- Prediction API.
+- Model output.
+- Probability calibration.
+- Confidence display.
+- Model version.
+- Missing-feature handling.
+- Error handling.
+
+Verify that the model uses actual timestamp-valid input data.
+
+Verify that it does not use future data.
+
+Check for hardcoded predictions and fabricated confidence scores.
+
+If trained models or validated datasets are missing, identify the limitation. Do not label a rules-based fallback as a trained ML prediction model.
+
+4.5 Technical indicators
+
+Independently validate:
+
+- RSI.
+- EMA.
+- SMA.
+- MACD.
+- VWAP.
+- ATR.
+- ADX.
+- Bollinger Bands.
+- Supertrend.
+- Volume indicators.
+
+Use controlled historical test datasets with known expected calculations.
+
+Check candle ordering, missing values and warm-up periods.
+
+4.6 Trading strategies
+
+Test each implemented strategy.
+
+Check:
+
+- Entry conditions.
+- Exit conditions.
+- Stop-loss.
+- Target.
+- Trailing stop-loss.
+- Partial exit.
+- Re-entry.
+- Holding period.
+- Market regime filters.
+- Signal expiration.
+
+Make sure that each strategy uses the correct timeframe and market data.
+
+4.7 Backtesting engine
+
+Verify:
+
+- Historical data loading.
+- Chronological processing.
+- Signal generation.
+- Execution assumptions.
+- Brokerage.
+- STT.
+- Exchange charges.
+- GST.
+- Stamp duty.
+- Applicable fees.
+- Spread.
+- Slippage.
+- Position sizing.
+- Partial fills.
+- Trade accounting.
+- Drawdown.
+- Profit factor.
+- Win rate.
+- Expectancy.
+- Sharpe ratio.
+- Sortino ratio.
+- Equity curve.
+
+Test for look-ahead bias and data leakage.
+
+Ensure that orders cannot be filled at unrealistic prices using information from a future candle.
+
+Compare fixed test scenarios against manually calculated expected results.
+
+4.8 Paper trading
+
+Test:
+
+- Virtual account creation.
+- Initial capital.
+- Buy.
+- Sell.
+- Position creation.
+- Average price.
+- Position updates.
+- Stop-loss.
+- Targets.
+- Partial exits.
+- Transaction charges.
+- Realised P&L.
+- Unrealised P&L.
+- Trade journal.
+- Order history.
+- Restart persistence.
+
+All automated tests must use simulated execution.
+
+4.9 Risk management
+
+Test:
+
+- Maximum loss per trade.
+- Maximum daily loss.
+- Maximum drawdown.
+- Maximum exposure.
+- Maximum number of positions.
+- Maximum trades per day.
+- Consecutive loss restriction.
+- Capital checks.
+- Position sizing.
+- Stale data rejection.
+- Spread restrictions.
+- Kill switch.
+
+Ensure that an order violating any mandatory risk restriction is rejected.
+
+4.10 Gemini AI
+
+Test:
+
+- API connection.
+- Request validation.
+- Invalid responses.
+- Rate-limit handling.
+- JSON output validation.
+- Signal explanation.
+- Market-summary generation.
+- News-summary attribution.
+- Token usage.
+- Error handling.
+
+Gemini must never bypass quantitative calculations or the deterministic risk engine.
+
+4.11 Broker integration
+
+Verify that the broker adapter works correctly without sending actual orders.
+
+Test authentication and API response handling through sandbox endpoints or mocked broker responses.
+
+Check:
+
+- Authentication.
+- Account status.
+- Order creation.
+- Order modification.
+- Cancellation.
+- Order status.
+- Partial fills.
+- Positions.
+- Available funds.
+- Reconciliation.
+
+NEVER PLACE A REAL BUY OR SELL ORDER DURING THIS TESTING PROCESS.
+
+==================================================
+PART 5: TEST FRONTEND AND USER EXPERIENCE
+==================================================
+
+Use the available Google AI Studio live preview and any supported test tools.
+
+Actually interact with the application wherever the environment permits.
+
+Test:
+
+- All navigation links.
+- Every button.
+- Every input.
+- All search fields.
+- Dropdowns.
+- Filters.
+- Modals.
+- Charts.
+- Tables.
+- Forms.
+- Watchlists.
+- Strategy configuration.
+- Backtesting actions.
+- Paper-trading controls.
+- Settings.
+
+Check:
+
+- Console errors.
+- Network errors.
+- Failed API requests.
+- Blank screens.
+- Broken layouts.
+- Loading loops.
+- Unresponsive buttons.
+- Incorrect routing.
+- Component crashes.
+- Incorrect responsive behaviour.
+
+Test desktop and mobile layouts.
+
+Make sure major workflows function from beginning to end.
+
+Do not claim that a UI automation test passed if the environment did not actually permit you to execute it.
+
+If automated browser interaction is unavailable, use the available preview and runtime diagnostics, add supported automated tests and clearly identify any remaining manual verification.
+
+==================================================
+PART 6: SECURITY AND RELIABILITY TESTING
+==================================================
+
+Audit:
+
+- Exposed API keys.
+- Exposed broker secrets.
+- Unsafe environment variables.
+- Insecure frontend API calls.
+- Missing authentication.
+- Incorrect Firestore rules.
+- Cross-user data access.
+- Injection risks.
+- Insecure dependencies.
+- Missing error handling.
+- Excessive API requests.
+- Rate-limit bypass.
+- Sensitive information in logs.
+
+Test:
+
+- WebSocket disconnect and reconnect.
+- API timeout.
+- Backend restart.
+- Provider outage.
+- Database outage.
+- Token expiry.
+- Duplicate events.
+- Duplicate orders.
+- Partial order fill.
+- Stale market feed.
+- Unexpected application shutdown.
+
+Implement appropriate error states, retries, exponential backoff, idempotency, health checks, monitoring and reconciliation.
+
+Never automatically retry an order in a way that could create duplicate real transactions.
+
+==================================================
+PART 7: VERIFY THE 70% PERFORMANCE CLAIM
+==================================================
+
+Audit the AI trading system's existing performance metrics.
+
+Check:
+
+- Whether 70% is real or hardcoded.
+- Whether it comes from training accuracy.
+- Whether it comes from backtesting.
+- Whether it is out-of-sample.
+- Whether transaction costs are included.
+- Whether the number of trades is sufficient.
+- Whether win rate is calculated correctly.
+- Whether the results include losing trades.
+- Whether strategies are overfitted.
+- Whether confidence scores are calibrated.
+
+Independently reproduce performance calculations using available trade history.
+
+Calculate:
+
+- Net win rate.
+- Profit factor.
+- Net expectancy.
+- Maximum drawdown.
+- Average winning trade.
+- Average losing trade.
+- Total trades.
+- Sharpe ratio.
+- Sortino ratio.
+- Performance by strategy.
+- Performance by market regime.
+
+If there is insufficient genuine data to establish a reliable 70% win rate, label the result as INSUFFICIENT EVIDENCE.
+
+Do not modify results to meet the target.
+
+==================================================
+PART 8: AUTOMATIC REPAIR REQUIREMENTS
+==================================================
+
+For each detected issue:
+
+1. Identify the exact source file.
+2. Record the error.
+3. Find the root cause.
+4. Implement the fix.
+5. Run the affected test.
+6. Run related regression tests.
+7. Confirm that the error no longer occurs.
+8. Update the issue log.
+
+Preserve functioning code and existing application design.
+
+Avoid:
+
+- Blind code replacement.
+- Random configuration changes.
+- Hiding errors.
+- Suppressing console messages without fixing causes.
+- Fake fallback data.
+- Hardcoded successful API responses.
+- Bypassing security restrictions.
+- Removing features to make tests pass.
+
+When an integration cannot work because credentials are unavailable, provide a proper configuration flow and a clear error message.
+
+When an API is unavailable, do not create an invented substitute.
+
+==================================================
+PART 9: TEST AUTOMATION AND QUALITY GATES
+==================================================
+
+Create or improve the test suite.
+
+Use appropriate existing tools or introduce suitable tools when supported:
+
+- TypeScript compiler.
+- ESLint.
+- Vitest or Jest.
+- React Testing Library.
+- Supertest or equivalent API testing.
+- Playwright, if supported in the available environment.
+
+Run:
+
+1. Dependency and build validation.
+2. Type checking.
+3. Linting.
+4. Unit tests.
+5. Integration tests.
+6. API tests.
+7. Data validation tests.
+8. AI-engine tests.
+9. Strategy tests.
+10. Backtesting regression tests.
+11. Risk-engine tests.
+12. Paper-trading tests.
+13. Security checks.
+14. End-to-end tests where executable.
+
+Do not install unnecessary dependencies or damage the existing package configuration.
+
+The application must build successfully.
+
+All P0 and P1 defects must be resolved before the final quality gate.
+
+All automated tests that are applicable to the available environment must pass, or be clearly listed as blocked with reasons.
+
+==================================================
+PART 10: CREATE TESTING DOCUMENTATION
+==================================================
+
+Maintain the following files:
+
+1. QA_AUDIT_REPORT.md
+2. LIVE_DATA_VERIFICATION.md
+3. BUG_REPORT.md
+4. BUG_FIX_LOG.md
+5. TEST_RESULTS.md
+6. SECURITY_AUDIT.md
+7. AI_MODEL_VALIDATION.md
+8. BACKTEST_VALIDATION.md
+9. PERFORMANCE_REPORT.md
+10. KNOWN_LIMITATIONS.md
+
+For every bug, include:
+
+- Issue ID.
+- Description.
+- Severity.
+- Affected module.
+- Root cause.
+- File modified.
+- Fix implemented.
+- Test performed.
+- Test result.
+- Current status.
+
+For live-data verification, include:
+
+- Actual provider.
+- Connection status.
+- Market status.
+- Latest source timestamp.
+- Update freshness.
+- Symbols tested.
+- Real-time/delayed/demo classification.
+- API/WebSocket result.
+- Missing credentials.
+- Final verification status.
+
+Never include secrets in documentation.
+
+==================================================
+PART 11: FINAL ACCEPTANCE CRITERIA
+==================================================
+
+The application can be considered successfully audited only when:
+
+[ ] Project has been inspected completely.
+
+[ ] Existing application architecture is understood.
+
+[ ] Application starts successfully.
+
+[ ] Application builds successfully.
+
+[ ] No unresolved P0 defects.
+
+[ ] No unresolved P1 defects that are fixable in the current environment.
+
+[ ] Major navigation and application workflows work.
+
+[ ] Stock scanner produces valid results.
+
+[ ] Technical indicators have been tested.
+
+[ ] AI integration has been tested.
+
+[ ] Strategy logic has been tested.
+
+[ ] Backtesting calculations have been validated.
+
+[ ] Risk engine has been tested.
+
+[ ] Paper trading works correctly.
+
+[ ] Duplicate order protection is tested.
+
+[ ] Database persistence is tested.
+
+[ ] Security checks are completed.
+
+[ ] Live market-data source has been identified.
+
+[ ] Live data is verified, or its exact external blocker is documented.
+
+[ ] Demo data is not presented as real market data.
+
+[ ] Stale market data is identified and rejected for new signals.
+
+[ ] No actual real-money order has been submitted.
+
+[ ] Test results and unresolved limitations are documented.
+
+==================================================
+PART 12: EXECUTION INSTRUCTIONS
+==================================================
+
+Begin immediately.
+
+Do not return only a checklist or theoretical report.
+
+Inspect the existing codebase, run actual tests, use the available live preview, inspect runtime logs, repair errors and retest the application.
+
+Execute the autonomous testing and repair loop repeatedly.
+
+Prioritise live market-data verification, core trading calculations, risk management, paper trading and security.
+
+If the market is open and valid provider credentials are available, conduct a real-time feed verification.
+
+If the market is closed, conduct the provider connection and historical data checks, but mark active-session live verification as pending.
+
+Never place real orders.
+
+Never fabricate API responses, live quotes, AI predictions, performance metrics or successful test results.
+
+After each iteration, update BUG_FIX_LOG.md and TEST_RESULTS.md.
+
+Continue until the acceptance criteria are satisfied or genuine external blockers prevent further progress.
+
+FINAL RESPONSE:
+
+Provide a clear summary containing:
+
+1. Overall application health.
+2. Number of bugs discovered.
+3. Number of bugs fixed.
+4. Number of tests executed.
+5. Number of tests passed.
+6. Number of tests failed.
+7. Remaining blocked tests.
+8. Whether live market data actually works.
+9. Exact data provider used.
+10. Real-time, delayed, cached or demo classification.
+11. Latest verified market-data timestamp.
+12. Whether the AI prediction engine works.
+13. Whether backtesting works.
+14. Whether paper trading works.
+15. Whether risk controls work.
+16. Security issues found and fixed.
+17. Files modified.
+18. Remaining limitations.
+19. Final application readiness status.
+
+Assign one of these final statuses:
+
+- VERIFIED: All major checks passed, with live data verified during an active market session.
+- FUNCTIONAL — LIVE VERIFICATION PENDING: Application works, but active-session data verification was not possible.
+- PARTIALLY FUNCTIONAL: Some features still have unresolved limitations.
+- BLOCKED: Important external dependencies prevent meaningful testing.
+- FAILED: Critical defects remain.
+
+Be completely honest about the results.
+
+DO NOT STOP AT FINDING PROBLEMS.
+
+FIND THE PROBLEMS, FIX THEM, TEST THE FIXES, REPEAT THE LOOP AND VERIFY THE FINAL APPLICATION.
+
+START THE COMPLETE TESTING AND REPAIR PROCESS NOW.

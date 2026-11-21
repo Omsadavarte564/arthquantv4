@@ -1,0 +1,6 @@
+{
+  "name": "ArthQuant",
+  "description": "AI-powered quantitative intraday trading research, strategy lab, backtesting, paper trading, and risk-gated execution terminal for NSE and BSE Indian equities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

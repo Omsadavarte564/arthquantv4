@@ -1,0 +1,14 @@
+# Competitive Analysis (`COMPETITIVE_ANALYSIS.md`)
+
+**Evaluation Date:** November 18, 2026
+
+| Platform | AI Capabilities | Strategies | Backtesting | Paper Trading | Execution | Risk Management | Data | Limitations |
+|---|---|---|---|---|---|---|---|---|
+| **StockWise** | AI concall summaries, stock insights, news extraction | Screener-based discovery | None (research-first) | Watchlist & portfolio tracking | None (informational) | None (advisory/analytics) | NSE/BSE fundamentals, FII/DII, prices | No automated strategy builder, backtester, or broker execution |
+| **StrykeX** | AI-assisted strategy guidance & prebuilt templates | 100+ indicators, directional & options multi-leg | Multi-year historical + charges/slippage | Virtual forward testing | Broker API (e.g., Dhan) | SL, Target, trailing SL, daily loss cap | Historical & broker feeds | No open ML probability calibration / causal OOS audit |
+| **TradingView** | Pine Script community scripts; no native calibrated ML engine | Unlimited Pine Script custom indicators | Strategy Tester (bar-magnifier on higher tiers) | Built-in Paper Trading | Limited Indian broker bridge support | Script-coded SL/TP | Global + NSE delayed/paid real-time | Look-ahead traps in `request.security()`, Pine not Python ML |
+| **QuantConnect (LEAN)** | Full Python/C# ML ecosystem | Institutional multi-asset `QCAlgorithm` | Tick/minute event-driven engine | Cloud & local paper trading | Global brokers; limited native Indian retail brokers | Portfolio construction & risk models | US/Global tick; NSE requires custom data | Steep learning curve; non-native Indian broker & SEBI workflow |
+| **Freqtrade** | FreqAI adaptive ML retraining pipeline | Python `IStrategy` classes | Vectorized + detailed order simulation | Dry-run mode | Crypto exchanges via CCXT | Max open trades, stoploss, ROI, protections | CCXT exchange OHLCV | Crypto-only; GPLv3 copyleft license; not NSE/SEBI compliant |
+| **Tradetron** | Minimal; rule-condition builder | No-code condition builder & marketplace | Paid/limited historical backtest | Paper trading tier | Multiple Indian brokers | Strategy-level SL/TP & universal exit | Indian NSE/NFO feeds | Marketplace performance transparency varies; opaque execution latency |
+| **AlgoTest** | Rule-based F&O focus | Options & directional templates | High-speed F&O historical simulator | Forward testing | Indian broker execution | MTM SL/Target, trailing | NSE F&O / Index data | Primarily F&O-focused rather than AI equity cash intraday |
+| **ArthQuant (Target)** | Walk-forward calibrated ML + Gemini explainability | 15 modular strategies + No-Code Builder | Causal no-lookahead + exact NSE costs | Persisted event-driven simulator | Broker adapter interface (SEBI gated) | Independent deterministic gatekeeper + kill switch | Validated OHLCV + provider adapters | Live NSE data & execution require user broker keys & SEBI compliance |

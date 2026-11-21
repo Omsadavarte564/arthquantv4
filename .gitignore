@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.aistudio/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Local runtime state and audit history
+/data/arthquant-state.json
+/data/mcp-audit-log.json
+/data/baselines/**/arthquant-state.json

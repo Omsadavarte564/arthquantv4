@@ -1,0 +1,919 @@
+# MASTER INTEGRATION PROMPT: ADD RAG AND MCP TO THE EXISTING AI INTRADAY TRADING APPLICATION
+
+## ROLE
+
+Act as a Senior AI Architect, RAG Engineer, MCP Developer, Gemini API Specialist, Full-Stack Developer, Quantitative Trading Engineer, Database Engineer and Software Testing Specialist.
+
+You are working inside my EXISTING, COMPLETED AI-powered intraday trading application in Google AI Studio Build Mode.
+
+Your task is to integrate two new capabilities:
+
+1. Retrieval-Augmented Generation (RAG).
+2. Model Context Protocol (MCP).
+
+These capabilities must become properly integrated parts of the existing application.
+
+IMPORTANT:
+- Do not create a new application.
+- Do not redesign the complete application.
+- Do not replace existing AI/ML algorithms.
+- Do not remove existing functionality.
+- Do not break existing market-data or broker connections.
+- Do not change the existing trading architecture unnecessarily.
+- Preserve the current UI design and application structure.
+- Modify the actual source code and implement working integrations.
+- Verify every integration through actual tests.
+
+The objective is to make the existing AI trading platform more knowledgeable, context-aware, explainable and capable of using its own application tools.
+
+==================================================
+PART 1: IMPLEMENT RAG
+==================================================
+
+## 1.1 Objective
+
+Implement a proper Retrieval-Augmented Generation system using Gemini.
+
+The RAG system should allow the existing Gemini AI assistant to retrieve relevant information from trusted financial documents, company announcements, market research and trading knowledge before generating an answer.
+
+The AI should not depend only on its pretrained knowledge.
+
+Use Google Gemini File Search as the preferred managed RAG solution if it is compatible with the existing Gemini SDK, API configuration and project runtime.
+
+Inspect the installed SDK and use the current official supported API.
+
+If managed File Search is unsuitable, explain why and implement an appropriate vector-search alternative without unnecessarily introducing a complex infrastructure.
+
+Do not create a fake RAG implementation that simply sends all documents to Gemini without retrieval.
+
+## 1.2 RAG knowledge base
+
+Create logically separated knowledge collections for:
+
+### A. Indian stock-market knowledge
+
+Include trusted documents relating to:
+- NSE.
+- BSE.
+- NIFTY indices.
+- Market regulations.
+- Trading sessions.
+- Market holidays.
+- Exchange circulars.
+- Trading restrictions.
+
+### B. Company information
+
+Include:
+- Annual reports.
+- Quarterly financial results.
+- Investor presentations.
+- Earnings reports.
+- Corporate announcements.
+- Corporate actions.
+- Company disclosures.
+- Public financial statements.
+
+### C. Financial news and research
+
+Include appropriately licensed or authorised:
+- Market news.
+- Company news.
+- Sector reports.
+- Economic developments.
+- Analyst research where permitted.
+- Important market announcements.
+
+### D. Trading knowledge
+
+Include:
+- Technical-analysis documentation.
+- Indicator documentation.
+- Trading strategy manuals.
+- Risk-management documentation.
+- Backtesting methodology.
+- Quantitative research.
+- Algorithmic trading documentation.
+
+### E. Regulatory and compliance knowledge
+
+Include:
+- SEBI circulars.
+- NSE guidelines.
+- BSE guidelines.
+- Broker API documentation.
+- Retail algorithmic-trading requirements.
+- Applicable compliance documentation.
+
+Use official sources wherever possible.
+
+Do not ingest documents from unauthorised or unlicensed sources.
+
+## 1.3 RAG document ingestion system
+
+Develop a document-ingestion pipeline.
+
+Support suitable formats including:
+
+- PDF.
+- DOCX.
+- TXT.
+- Markdown.
+- CSV.
+- JSON.
+- HTML, where permitted.
+
+Use Gemini File Search if it supports the selected formats.
+
+The document ingestion workflow should support:
+
+1. Uploading a document.
+2. Validating its format.
+3. Checking its size.
+4. Extracting available metadata.
+5. Generating a document identifier.
+6. Calculating a content hash to identify duplicates.
+7. Uploading the document to the RAG knowledge store.
+8. Tracking indexing status.
+9. Recording its source.
+10. Making the document available for retrieval.
+11. Removing or updating documents where required.
+
+Maintain document metadata:
+
+- Document ID.
+- Document title.
+- Source URL.
+- Publisher.
+- Document category.
+- Publication date.
+- Effective date.
+- Upload date.
+- Last updated date.
+- Version.
+- Exchange or company.
+- Related stock symbol.
+- Document status.
+- Knowledge-base collection.
+
+Preserve source references and page-level references wherever supported.
+
+Never invent publication dates or sources.
+
+## 1.4 RAG retrieval engine
+
+Create a proper retrieval workflow:
+
+USER QUESTION
+→ QUERY CLASSIFICATION
+→ KNOWLEDGE COLLECTION SELECTION
+→ SEMANTIC RETRIEVAL
+→ RELEVANCE FILTERING
+→ DOCUMENT CONTEXT
+→ GEMINI RESPONSE
+→ SOURCE CITATIONS.
+
+Implement:
+
+- Semantic document retrieval.
+- Relevance ranking.
+- Metadata filtering.
+- Source prioritisation.
+- Context-size management.
+- Duplicate-result removal.
+- Retrieval confidence checks.
+- Citation generation.
+- No-result handling.
+
+The system should retrieve only relevant information instead of unnecessarily loading entire documents into the model context.
+
+For questions involving current regulations or announcements, prioritise the latest applicable documents. Do not automatically treat an old circular as current when it has been amended or superseded.
+
+## 1.5 RAG-powered AI assistant
+
+Integrate RAG into the existing Gemini AI assistant.
+
+The assistant should answer questions such as:
+
+- Why is a particular stock moving today?
+- What happened in a company's latest quarterly results?
+- What recent announcements relate to this stock?
+- What are the applicable trading rules?
+- Explain a company's financial performance.
+- Explain a particular trading strategy.
+- Why did the AI trading engine generate a particular signal?
+- Which documents support the analysis?
+- What are the important risks associated with this company?
+
+Responses should include:
+
+- Direct answer.
+- Relevant facts.
+- Important context.
+- Document references.
+- Source names.
+- Publication dates.
+- Page references where available.
+- Retrieval confidence or an appropriate indication of insufficient evidence.
+
+If sources do not support an answer, clearly say that sufficient evidence was not found.
+
+Do not hallucinate financial figures or citations.
+
+## 1.6 Important separation: RAG versus live market data
+
+Do not use RAG as a replacement for live market-data APIs or WebSockets.
+
+Maintain the following distinction:
+
+- Live prices: Existing authorised market-data provider.
+- Historical prices: Existing historical market-data infrastructure.
+- Current quotes: Existing market API.
+- News documents: RAG where indexing and retrieval are appropriate.
+- Financial reports: RAG.
+- Regulatory documents: RAG.
+- Trading manuals: RAG.
+- Technical calculations: Existing quantitative engine.
+- AI prediction: Existing validated AI/ML engine.
+
+If a user asks for the current Reliance share price, obtain it from the live market-data provider, not an old indexed document.
+
+When a user asks about current market movement, combine verified live market information with relevant retrieved news, provided that the news data is sufficiently recent.
+
+Never present an old RAG document as current news.
+
+==================================================
+PART 2: IMPLEMENT MCP
+==================================================
+
+## 2.1 Objective
+
+Implement Model Context Protocol support so that the existing Gemini AI assistant can securely access selected functions of the trading application through standardised MCP tools.
+
+Do not simply rename existing API functions as MCP.
+
+Create a real MCP-compatible integration using an appropriate current official MCP SDK and supported transport.
+
+Inspect the Google AI Studio Node.js runtime and the current SDK documentation before implementation.
+
+Prefer a compatible remote Streamable HTTP MCP server when the application requires a deployable network service.
+
+If a persistent local process or another transport is required by the selected SDK, verify that the Google AI Studio runtime supports it before choosing that architecture.
+
+Do not assume that experimental local MCP support works in a production web runtime.
+
+If the existing environment cannot host the MCP service, implement a separately deployable Node.js MCP service with secure authentication and complete integration instructions.
+
+## 2.2 MCP server architecture
+
+Create an MCP server that exposes selected existing backend services as tools.
+
+Architecture:
+
+GEMINI AI ASSISTANT
+        |
+        v
+MCP CLIENT
+        |
+        v
+MCP SERVER
+        |
+        v
+EXISTING BACKEND SERVICES
+        |
+        +--- Market Data
+        +--- Stock Scanner
+        +--- Technical Analysis
+        +--- AI Prediction
+        +--- Strategy Engine
+        +--- Backtesting
+        +--- Paper Trading
+        +--- Portfolio
+        +--- Risk Management
+
+Reuse existing backend functionality.
+
+Do not duplicate trading logic unnecessarily.
+
+Every tool must have:
+- Tool name.
+- Description.
+- Input schema.
+- Output schema.
+- Validation.
+- Authentication requirements.
+- Permission requirements.
+- Error handling.
+- Timeout handling.
+- Audit logging.
+
+## 2.3 MCP tools to implement
+
+Implement suitable tools from the following list.
+
+### Market information tools
+
+1. `get_market_status`
+   - Current market status.
+   - Trading session.
+   - Market holiday status where available.
+
+2. `get_live_quote`
+   - Stock symbol.
+   - Exchange.
+   - Current verified quote.
+   - Source timestamp.
+   - Data freshness.
+   - Real-time or delayed classification.
+
+3. `get_historical_candles`
+   - Stock symbol.
+   - Timeframe.
+   - Date range.
+   - Historical OHLCV information.
+
+4. `search_stocks`
+   - Search by stock name or symbol.
+   - Return valid supported instruments.
+
+5. `get_sector_performance`
+   - Sector-wise information.
+   - Source timestamps.
+
+### AI and analysis tools
+
+6. `scan_stocks`
+   - Search stocks using existing scanner filters.
+
+7. `get_technical_analysis`
+   - RSI.
+   - MACD.
+   - EMA.
+   - VWAP.
+   - ADX.
+   - ATR.
+   - Other existing supported indicators.
+
+8. `get_ai_signal`
+   - Latest existing AI prediction.
+   - Signal direction.
+   - Entry.
+   - Stop-loss.
+   - Targets.
+   - Model version.
+   - Prediction timestamp.
+   - Data freshness.
+   - Confidence and uncertainty.
+
+9. `get_market_regime`
+   - Current detected market regime.
+   - Relevant supporting data.
+
+10. `get_stock_fundamentals`
+    - Available company information.
+    - Financial metrics.
+    - Data source and reporting period.
+
+11. `get_recent_announcements`
+    - Available announcements.
+    - Publication dates.
+    - Source references.
+
+12. `get_relevant_documents`
+    - Search the existing RAG knowledge base.
+    - Return relevant documents and citations.
+
+### Strategy and backtesting tools
+
+13. `get_strategy_metrics`
+    - Strategy performance.
+    - Win rate.
+    - Profit factor.
+    - Net expectancy.
+    - Drawdown.
+    - Trade count.
+
+14. `list_available_strategies`
+    - Supported strategies.
+    - Configuration information.
+
+15. `run_backtest`
+    - Strategy.
+    - Stock.
+    - Date range.
+    - Timeframe.
+    - Configuration.
+
+This must use the existing backtesting engine.
+
+Apply execution limits and validate input parameters.
+
+Long-running backtests should return a job identifier and status rather than blocking the MCP request indefinitely.
+
+### Portfolio and paper-trading tools
+
+16. `get_paper_portfolio`
+    - Paper account balance.
+    - Available capital.
+    - P&L.
+
+17. `get_paper_positions`
+    - Current virtual positions.
+
+18. `get_paper_orders`
+    - Existing simulated orders.
+
+19. `get_trade_history`
+    - Historical paper trades.
+
+20. `get_risk_status`
+    - Current risk exposure.
+    - Daily loss.
+    - Risk restrictions.
+    - Kill-switch status.
+
+Ensure that all account-specific tools enforce user-level authorisation.
+
+## 2.4 Trading execution safety
+
+IMPORTANT:
+
+Do not expose unrestricted live order-placement tools to Gemini or MCP.
+
+MCP must not bypass the existing risk-management engine.
+
+Do not implement unrestricted tools such as:
+- Execute any live BUY order.
+- Execute any live SELL order.
+- Modify arbitrary broker positions.
+- Disable risk restrictions.
+- Disable the kill switch.
+
+If a paper-trading action tool is useful, it must:
+
+1. Work only with the simulated paper account.
+2. Validate all arguments.
+3. Pass through the existing risk engine.
+4. Require explicit user confirmation through the application UI.
+5. Record an audit event.
+6. Return the actual simulated execution status.
+
+All future live broker actions must require a separate controlled workflow with applicable regulatory and broker checks.
+
+MCP tools must never have permission to alter their own access restrictions.
+
+==================================================
+PART 3: CONNECT GEMINI WITH RAG AND MCP
+==================================================
+
+Integrate both capabilities into the existing Gemini AI assistant.
+
+Create an intelligent request-routing mechanism.
+
+When the user asks a question, determine which capabilities are necessary.
+
+### Example 1: Document question
+
+User:
+"Explain the latest Reliance quarterly results."
+
+Workflow:
+1. Identify the stock.
+2. Retrieve the latest available financial-results documents using RAG.
+3. Check publication dates.
+4. Retrieve relevant passages.
+5. Generate an explanation.
+6. Display citations.
+
+### Example 2: Live market question
+
+User:
+"What is the current price of Reliance?"
+
+Workflow:
+1. Call `get_live_quote`.
+2. Validate the returned timestamp.
+3. Check data freshness.
+4. Return the actual quote.
+5. Identify whether the data is live, delayed or unavailable.
+
+Do not use RAG for the current quote.
+
+### Example 3: Combined research
+
+User:
+"Why is Infosys falling today?"
+
+Workflow:
+1. Call the existing market-data tools.
+2. Retrieve relevant recent announcements using MCP.
+3. Retrieve relevant indexed documents using RAG.
+4. Analyse current price movement and available volume information.
+5. Explain the findings.
+6. Distinguish verified facts from possible explanations.
+7. Cite sources and timestamps.
+
+### Example 4: Strategy question
+
+User:
+"Which of my strategies performed best this month?"
+
+Workflow:
+1. Call `get_strategy_metrics`.
+2. Retrieve relevant strategy documentation through RAG if useful.
+3. Compare verified performance statistics.
+4. Explain the results.
+
+### Example 5: Portfolio question
+
+User:
+"What is my current paper-trading exposure?"
+
+Workflow:
+1. Verify the user's authentication.
+2. Call `get_paper_portfolio`.
+3. Call `get_paper_positions`.
+4. Calculate or retrieve the existing exposure metrics.
+5. Return the actual available information.
+
+Never invent missing values.
+
+==================================================
+PART 4: USER INTERFACE INTEGRATION
+==================================================
+
+Integrate RAG and MCP into the existing UI without redesigning the application.
+
+### A. Upgrade existing AI assistant
+
+Add support for:
+
+- Document-based questions.
+- Stock analysis.
+- Financial document summaries.
+- News explanations.
+- Market-data queries.
+- Strategy-performance questions.
+- Portfolio questions.
+- Backtest queries.
+
+Display useful citations in AI answers.
+
+Where possible, make citations expandable so users can see the source document, publication date and relevant page.
+
+### B. Knowledge Base Management
+
+Create an administrative section called:
+
+"AI Knowledge Base"
+
+Include:
+
+- Upload document.
+- Upload PDF.
+- Select document category.
+- Enter source URL.
+- View uploaded documents.
+- Search documents.
+- View indexing status.
+- Update documents.
+- Remove documents.
+- View ingestion errors.
+- View last-updated timestamps.
+
+Do not expose administrative document-management permissions to ordinary users.
+
+### C. MCP Management
+
+Create a section called:
+
+"MCP Integrations"
+
+Display:
+
+- MCP server status.
+- Transport type.
+- Connection status.
+- Authentication status.
+- Available tools.
+- Tool descriptions.
+- Tool permission levels.
+- Last successful connection.
+- Last tool invocation.
+- Tool errors.
+
+Add a test-connection function where supported.
+
+Do not display secrets or access tokens.
+
+### D. AI response transparency
+
+The AI assistant should distinguish between:
+
+- Retrieved document information.
+- Live market information.
+- Historical information.
+- Quantitative AI predictions.
+- Calculated trading indicators.
+- General explanations.
+
+Display source timestamps and data status wherever relevant.
+
+==================================================
+PART 5: SECURITY AND PERMISSIONS
+==================================================
+
+Implement strong security for both RAG and MCP.
+
+### RAG security
+
+- Restrict document management to authorised users.
+- Do not index broker secrets.
+- Do not index API keys.
+- Do not expose private user documents to other users.
+- Validate document types.
+- Prevent malicious document instructions from controlling the AI.
+- Treat retrieved content as untrusted data.
+- Validate source URLs.
+- Maintain document provenance.
+- Implement document deletion and access controls.
+
+Keep personal portfolio data outside shared knowledge collections.
+
+### MCP security
+
+- Authenticate MCP clients.
+- Validate tool input schemas.
+- Enforce user-level permissions.
+- Use a strict tool allowlist.
+- Apply rate limits.
+- Apply request timeouts.
+- Validate responses.
+- Maintain tool-call audit logs.
+- Prevent cross-user data access.
+- Prevent arbitrary filesystem access.
+- Prevent arbitrary shell execution.
+- Prevent unrestricted SQL execution.
+- Prevent secret disclosure.
+- Protect against malicious tool instructions.
+
+Do not expose administrative or financial execution capabilities to an unauthorised assistant session.
+
+==================================================
+PART 6: DATABASE AND STORAGE
+==================================================
+
+Inspect the existing database first.
+
+Reuse existing infrastructure wherever possible.
+
+Add suitable storage for:
+
+- Knowledge-base document metadata.
+- Document indexing status.
+- Document sources.
+- Document versions.
+- MCP server configuration.
+- MCP tool registry.
+- MCP connection status.
+- Tool invocation logs.
+- User-level permissions.
+- Integration status.
+
+If Firebase Firestore is already used, extend its existing schema rather than creating another database unnecessarily.
+
+Use suitable database indexes and validation.
+
+Do not store large document embeddings or high-frequency market ticks in Firestore if an appropriate managed retrieval service or time-series database is already available.
+
+==================================================
+PART 7: TESTING AND AUTOMATIC BUG FIXING
+==================================================
+
+After implementation, perform actual testing.
+
+Create a continuous development loop:
+
+INSPECT
+→ IMPLEMENT
+→ BUILD
+→ TEST
+→ DETECT ERRORS
+→ FIX CODE
+→ RETEST
+→ REGRESSION TEST.
+
+Repeat until all fixable critical integration problems are resolved.
+
+### RAG tests
+
+Test:
+
+1. Document upload.
+2. Document validation.
+3. Indexing.
+4. Duplicate detection.
+5. Retrieval.
+6. Relevance.
+7. Metadata filtering.
+8. Citations.
+9. Source attribution.
+10. Document updates.
+11. Document deletion.
+12. No-result behaviour.
+13. Invalid document handling.
+14. Access permissions.
+
+Ask actual questions against uploaded test documents and verify that the correct information is retrieved.
+
+### MCP tests
+
+Test:
+
+1. MCP server startup.
+2. Protocol initialisation.
+3. Server capabilities.
+4. Tool discovery.
+5. Tool listing.
+6. Tool input validation.
+7. Tool execution.
+8. Tool output validation.
+9. Authentication.
+10. Permission enforcement.
+11. Invalid tool arguments.
+12. Timeouts.
+13. Server disconnection.
+14. Reconnection.
+15. Audit logging.
+16. Cross-user isolation.
+
+Verify actual MCP protocol communication. Do not consider ordinary Gemini function calling proof of MCP compatibility.
+
+### Integration tests
+
+Test combinations of:
+
+- Gemini + RAG.
+- Gemini + MCP.
+- Gemini + RAG + MCP.
+- MCP + existing market-data provider.
+- MCP + existing quantitative AI engine.
+- MCP + existing strategy engine.
+- RAG + financial announcements.
+- RAG + company reports.
+- RAG + strategy documentation.
+
+### Regression tests
+
+Confirm that the following existing features still work:
+
+- Market dashboard.
+- Live market data.
+- Stock scanner.
+- AI predictions.
+- Technical indicators.
+- Strategy engine.
+- Backtesting.
+- Paper trading.
+- Portfolio.
+- Risk management.
+- Authentication.
+- Broker integration readiness.
+
+Never place actual live buy or sell orders during testing.
+
+Fix all actual code errors discovered during the integration.
+
+Do not use dummy results to make failed tests appear successful.
+
+==================================================
+PART 8: REQUIRED DOCUMENTATION
+==================================================
+
+Create and maintain:
+
+1. `RAG_ARCHITECTURE.md`
+2. `RAG_IMPLEMENTATION.md`
+3. `RAG_DATA_SOURCES.md`
+4. `MCP_ARCHITECTURE.md`
+5. `MCP_TOOL_CATALOG.md`
+6. `MCP_SECURITY.md`
+7. `GEMINI_RAG_MCP_INTEGRATION.md`
+8. `RAG_TEST_RESULTS.md`
+9. `MCP_TEST_RESULTS.md`
+10. `INTEGRATION_BUG_LOG.md`
+11. `INTEGRATION_DEPLOYMENT_GUIDE.md`
+12. `KNOWN_LIMITATIONS.md`
+
+Document actual implementations, APIs, dependencies, configurations, test results and any external requirements.
+
+==================================================
+PART 9: IMPLEMENTATION REQUIREMENTS
+==================================================
+
+Before coding:
+
+1. Inspect the existing project.
+2. Understand the existing Gemini integration.
+3. Inspect installed SDK versions.
+4. Identify existing market-data services.
+5. Identify existing backend services.
+6. Inspect the current database.
+7. Determine the appropriate RAG architecture.
+8. Determine an MCP architecture compatible with Google AI Studio.
+
+Use Google AI Studio's server-side Node.js runtime where appropriate.
+
+Keep Gemini and external API credentials server-side using the existing Secrets configuration.
+
+Do not expose secrets in frontend code.
+
+Use current official Gemini API, File Search and MCP SDK documentation.
+
+Avoid unnecessarily migrating existing Gemini integrations or upgrading unrelated dependencies.
+
+Keep the implementation modular.
+
+Do not add unnecessary third-party services.
+
+If credentials, subscriptions or external deployment are required, implement the appropriate configuration interfaces and document exactly what is missing.
+
+Do not report an integration as working until it has been tested.
+
+==================================================
+PART 10: FINAL ACCEPTANCE CRITERIA
+==================================================
+
+The task is complete when:
+
+[ ] RAG is implemented.
+[ ] Knowledge-base ingestion works.
+[ ] Documents can be indexed.
+[ ] Documents can be retrieved.
+[ ] Gemini can answer with retrieved context.
+[ ] Responses contain grounded citations where supported.
+[ ] Document metadata is preserved.
+[ ] Live market queries still use live market APIs.
+[ ] RAG does not replace the quantitative engine.
+[ ] MCP server is implemented.
+[ ] MCP protocol initialisation works.
+[ ] MCP tools can be discovered.
+[ ] MCP tool calls execute successfully.
+[ ] MCP authentication is verified.
+[ ] Permissions are enforced.
+[ ] Portfolio tools respect user boundaries.
+[ ] Trading risk restrictions remain intact.
+[ ] No unrestricted live order execution is exposed.
+[ ] Gemini can use RAG and MCP together.
+[ ] Existing features continue working.
+[ ] Application builds successfully.
+[ ] Integration tests pass.
+[ ] Security tests are completed.
+[ ] Documentation is updated.
+
+If something cannot be completed due to missing credentials or environment limitations, clearly identify it as BLOCKED rather than marking it as complete.
+
+==================================================
+FINAL EXECUTION COMMAND
+==================================================
+
+Start working on the existing project immediately.
+
+First inspect the complete codebase and determine how the new RAG and MCP capabilities fit into the current architecture.
+
+Then implement RAG, implement MCP, connect both to the existing Gemini AI assistant, add the relevant UI, test all integrations and repair any errors.
+
+Preserve the current application.
+
+Do not rebuild the project.
+
+Do not remove or weaken the existing AI/ML algorithms, live market-data connections, backtesting system, paper-trading system or independent risk engine.
+
+Actually modify the existing source code.
+
+Do not return only an implementation plan.
+
+Continue through implementation, testing and debugging until the acceptance criteria are met or a genuine external dependency prevents further progress.
+
+At completion, provide:
+
+- Files created.
+- Files modified.
+- RAG architecture implemented.
+- MCP architecture implemented.
+- Number of documents tested.
+- Successful retrieval tests.
+- MCP tools implemented.
+- MCP tools successfully tested.
+- Gemini integration status.
+- Security test results.
+- Existing features verified.
+- Build and test results.
+- External dependencies.
+- Remaining issues.
+
+FINAL GOAL:
+
+Transform the existing AI intraday trading application into a more intelligent, knowledge-grounded and tool-connected platform by integrating RAG and MCP without compromising its existing quantitative trading intelligence, accuracy validation, data reliability or financial safety.
+
+Start implementation now.
