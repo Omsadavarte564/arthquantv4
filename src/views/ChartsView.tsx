@@ -1,6 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { TradingChart } from '../components/TradingChart';
+import { TradingViewWidget } from '../components/TradingViewWidget';
 import { api } from '../lib/api';
 import { Candle, IndicatorPoint, StockMetadata, Timeframe, TradingSignal } from '../types/trading';
 
@@ -38,6 +39,7 @@ export function ChartsView({
   const [showVwap, setShowVwap] = useState(true);
   const [showBollinger, setShowBollinger] = useState(false);
   const [showSupertrend, setShowSupertrend] = useState(true);
+  const [chartEngine, setChartEngine] = useState<'quant' | 'tradingview'>('quant');
 
   const fetchChartData = useCallback(
     async (silent = false) => {
@@ -159,6 +161,30 @@ export function ChartsView({
             ))}
           </div>
 
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-md">
+            <button
+              onClick={() => setChartEngine('quant')}
+              className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
+                chartEngine === 'quant'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Quant Chart
+            </button>
+            <button
+              onClick={() => setChartEngine('tradingview')}
+              className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
+                chartEngine === 'tradingview'
+                  ? 'bg-sky-600 text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Official TradingView Real-Time Streaming Chart"
+            >
+              TradingView Live
+            </button>
+          </div>
+
           <button
             onClick={() => fetchChartData(true)}
             disabled={refreshing || loading}
@@ -221,8 +247,14 @@ export function ChartsView({
         </div>
       )}
 
-      {/* TradingView Lightweight Chart */}
-      {error ? (
+      {/* Chart Display: Quant Chart or TradingView Live Real-Time Widget */}
+      {chartEngine === 'tradingview' ? (
+        <TradingViewWidget
+          symbol={selectedSymbol}
+          darkMode={darkMode}
+          interval={timeframe === '1m' ? '1' : timeframe === '15m' ? '15' : '5'}
+        />
+      ) : error ? (
         <div className="p-6 rounded-lg border border-rose-500/40 bg-rose-500/5 text-xs text-rose-600 dark:text-rose-400">
           Chart Data Error ({selectedSymbol}): {error}
         </div>
