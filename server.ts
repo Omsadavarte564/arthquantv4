@@ -1490,10 +1490,22 @@ async function startServer() {
     }
   });
 
-  // ── Vite Dev Middleware / Production Static Serve ───────────────────────────
-  if (process.env.NODE_ENV !== 'production') {
+  // ── Production Static Serve / Vite Dev Middleware ───────────────────────────
+  const distDir = path.resolve(__dirname, 'dist');
+  const hasDist = fs.existsSync(distDir) && fs.existsSync(path.join(distDir, 'index.html'));
+
+  if (process.env.NODE_ENV === 'production' || hasDist) {
+    app.use(express.static(distDir));
+    app.get('*', (req: Request, res: Response, next: NextFunction) => {
+      if (req.originalUrl.startsWith('/api')) {
+        return next();
+      }
+      res.sendFile(path.join(distDir, 'index.html'));
+    });
+  } else {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      root: __dirname,
+      server: { middlewareMode: true, hmr: false },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -1512,14 +1524,6 @@ async function startServer() {
         next(e);
       }
     });
-  } else {
-    const distDir = path.resolve(__dirname, 'dist');
-    if (fs.existsSync(distDir)) {
-      app.use(express.static(distDir));
-      app.get('*', (_req: Request, res: Response) => {
-        res.sendFile(path.join(distDir, 'index.html'));
-      });
-    }
   }
 
   app.listen(PORT, '0.0.0.0', () => {

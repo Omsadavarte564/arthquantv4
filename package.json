@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "start": "NODE_ENV=production tsx server.ts",
-    "build": "vite build",
+    "build": "vite build && node -e \"const fs=require('fs'); const f=fs.readdirSync('dist/assets').find(x=>x.startsWith('index-')&&x.endsWith('.css')); if(f){ require('child_process').execSync('npx @tailwindcss/cli -i src/index.css -o dist/assets/' + f + ' --minify', {stdio:'inherit'}); }\"",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
