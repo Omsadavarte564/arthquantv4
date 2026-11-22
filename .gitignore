@@ -3,6 +3,9 @@ build/
 dist/
 coverage/
 .aistudio/
+.vscode/settings.json
+__pycache__/
+*.py[cod]
 .DS_Store
 *.log
 .env*
@@ -11,4 +14,5 @@ coverage/
 # Local runtime state and audit history
 /data/arthquant-state.json
 /data/mcp-audit-log.json
+/data/subscribers.json
 /data/baselines/**/arthquant-state.json

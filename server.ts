@@ -1,11 +1,24 @@
+import { spawn, ChildProcess } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { createServer as createViteServer } from 'vite';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+if (process.cwd() !== __dirname) {
+  try {
+    process.chdir(__dirname);
+  } catch {
+    // ignore
+  }
+}
 import {
   BacktestConfig,
+  Candle,
   HistoricalDatasetMetadata,
   ModelFamily,
   RiskConfig,
@@ -70,13 +83,30 @@ import {
   stepSimulationBar,
   submitPaperOrder,
 } from './server/storage/stateStore.ts';
+import { notificationService } from './server/services/notificationService.ts';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const PORT = Number(process.env.PORT || 3000);
 
 async function startServer() {
   const app = express();
+  const requireAlertsAdmin = (req: Request, res: Response, next: NextFunction): void => {
+    const expectedToken = process.env.ALERTS_ADMIN_TOKEN || '';
+    if (expectedToken.length < 32) {
+      res.status(503).json({ error: 'Alert management is disabled until ALERTS_ADMIN_TOKEN is configured with at least 32 characters' });
+      return;
+    }
+
+    const authorization = req.headers.authorization || '';
+    const bearerToken = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+    const providedToken = req.headers['x-admin-token'] || bearerToken;
+    if (!constantTimeTokenMatch(providedToken, expectedToken)) {
+      res.status(401).json({ error: 'Unauthorized: valid alert admin token required' });
+      return;
+    }
+    next();
+  };
   app.use(express.json({ limit: '15mb' }));
 
   // ── Health & Runtime Status ──────────────────────────────────────────────────
@@ -489,6 +519,121 @@ async function startServer() {
     res.json(evaluation);
   });
 
+  // ── Python ML Microservice Proxy (Trio Ensemble: LightGBM + CatBoost + XGBoost) ──
+  app.get('/api/ml/python/health', async (_req: Request, res: Response) => {
+    const mlUrl = process.env.ML_SERVICE_URL || 'http://127.0.0.1:8000';
+    try {
+      const resp = await fetch(`${mlUrl}/health`, { signal: AbortSignal.timeout(3000) });
+      const data = await resp.json();
+      res.json(data);
+    } catch (err) {
+      res.status(503).json({
+        status: 'OFFLINE',
+        activeBackend: 'DETERMINISTIC_FALLBACK',
+        error: err instanceof Error ? err.message : 'Cannot reach Python ML microservice',
+      });
+    }
+  });
+
+  app.get('/api/ml/python/models', async (_req: Request, res: Response) => {
+    const mlUrl = process.env.ML_SERVICE_URL || 'http://127.0.0.1:8000';
+    try {
+      const resp = await fetch(`${mlUrl}/models`, { signal: AbortSignal.timeout(3000) });
+      const data = await resp.json();
+      res.json(data);
+    } catch (err) {
+      res.status(503).json({
+        error: err instanceof Error ? err.message : 'Cannot reach Python ML microservice',
+      });
+    }
+  });
+
+  app.post('/api/ml/python/predict', async (req: Request, res: Response) => {
+    const mlUrl = process.env.ML_SERVICE_URL || 'http://127.0.0.1:8000';
+    try {
+      const resp = await fetch(`${mlUrl}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body),
+        signal: AbortSignal.timeout(3000),
+      });
+      const data = await resp.json();
+      res.status(resp.status).json(data);
+    } catch (err) {
+      res.status(503).json({
+        error: err instanceof Error ? err.message : 'Cannot reach Python ML microservice',
+      });
+    }
+  });
+
+  // ── Mobile Notifications (Multi-User Telegram & WhatsApp) ───────────────────
+  app.get('/api/alerts/status', requireAlertsAdmin, (_req: Request, res: Response) => {
+    res.json(notificationService.getStatus());
+  });
+
+  app.get('/api/alerts/subscribers', requireAlertsAdmin, (_req: Request, res: Response) => {
+    res.json(notificationService.getSubscribers());
+  });
+
+  app.post('/api/alerts/subscribers/add', requireAlertsAdmin, (req: Request, res: Response) => {
+    const { chatId, phone, apiKey, name, channel } = req.body || {};
+    if (channel === 'whatsapp' || phone) {
+      if (!phone || !apiKey) {
+        res.status(400).json({ error: 'Missing phone or apiKey for WhatsApp subscriber' });
+        return;
+      }
+      notificationService.addWhatsAppSubscriber(String(phone), String(apiKey), String(name || 'Trader'));
+      res.json({ success: true, message: `WhatsApp subscriber added for ${phone}` });
+      return;
+    }
+
+    if (!chatId) {
+      res.status(400).json({ error: 'Missing chatId for Telegram subscriber' });
+      return;
+    }
+    notificationService.addTelegramSubscriber(String(chatId), String(name || 'Trader'));
+    res.json({ success: true, message: `Telegram subscriber added for chatId ${chatId}` });
+  });
+
+  app.post('/api/alerts/subscribers/remove', requireAlertsAdmin, (req: Request, res: Response) => {
+    const { chatId } = req.body || {};
+    if (!chatId) {
+      res.status(400).json({ error: 'Missing chatId to remove' });
+      return;
+    }
+    const ok = notificationService.removeTelegramSubscriber(String(chatId));
+    res.json({ success: ok, message: ok ? 'Subscriber removed' : 'Subscriber not found' });
+  });
+
+  app.post('/api/alerts/broadcast', requireAlertsAdmin, async (req: Request, res: Response) => {
+    const message = String(req.body?.message || '').trim();
+    if (!message) {
+      res.status(400).json({ error: 'Missing message body to broadcast' });
+      return;
+    }
+    const [tgRes, waRes] = await Promise.all([
+      notificationService.broadcastTelegram(message, 'HTML'),
+      notificationService.broadcastWhatsApp(message),
+    ]);
+    res.json({
+      success: tgRes.sent > 0 || waRes.sent > 0,
+      telegram: tgRes,
+      whatsapp: waRes,
+    });
+  });
+
+  app.post('/api/alerts/test', requireAlertsAdmin, async (_req: Request, res: Response) => {
+    const result = await notificationService.sendTestAlert();
+    res.json({
+      success: result.telegramSent > 0 || result.whatsappSent > 0,
+      delivery: result,
+      status: notificationService.getStatus(),
+      hint: result.totalRecipients === 0
+        ? 'No active subscribers found. Users can send /start to your Telegram bot or configure TELEGRAM_CHAT_ID in .env'
+        : `Test alert dispatched to ${result.totalRecipients} recipients`,
+    });
+  });
+
   // ── Prediction Ledger, Drift Monitoring & Model Rollback ────────────────────
   app.get('/api/monitoring/summary', (_req: Request, res: Response) => {
     const state = loadState();
@@ -809,6 +954,199 @@ async function startServer() {
     const state = loadState();
     const account = closePaperPosition(state, symbol, 'MANUAL_SQUAREOFF');
     res.json({ account });
+  });
+
+  // ── TradingView Alert Webhook ──────────────────────────────────────────────
+  app.post('/api/webhooks/tradingview', (req: Request, res: Response) => {
+    const configuredSecret = process.env.TRADINGVIEW_WEBHOOK_SECRET || '';
+    if (configuredSecret.length < 32) {
+      res.status(503).json({ error: 'TradingView webhook is disabled until TRADINGVIEW_WEBHOOK_SECRET is configured with at least 32 characters' });
+      return;
+    }
+    const providedSecret = String(req.headers['x-webhook-token'] || req.body?.secret || '');
+
+    if (!constantTimeTokenMatch(providedSecret, configuredSecret)) {
+      res.status(401).json({ error: 'Unauthorized: Invalid TradingView webhook secret' });
+      return;
+    }
+
+    const body = req.body || {};
+    let rawSymbol = String(body.symbol || body.ticker || '').toUpperCase();
+    // Strip broker / exchange prefixes or suffixes (e.g., "NSE:RELIANCE", "RELIANCE.NS", "BSE:INFY")
+    const symbol = rawSymbol.replace(/^(NSE:|BSE:)/i, '').replace(/\.(NS|BO)$/i, '').trim();
+
+    if (!symbol) {
+      res.status(400).json({ error: 'Missing symbol in webhook payload' });
+      return;
+    }
+
+    const action = String(body.action || body.signal || '').toUpperCase();
+    const state = loadState();
+
+    if (action === 'CANDLE' || action === 'BAR') {
+      const open = Number(body.open);
+      const high = Number(body.high);
+      const low = Number(body.low);
+      const close = Number(body.close);
+      const volume = Number(body.volume || 0);
+      const time = Number(body.time || Math.floor(Date.now() / 1000));
+      const tf = parseTimeframe(body.timeframe || '5m');
+
+      if (!Number.isFinite(close) || !Number.isFinite(open)) {
+        res.status(400).json({ error: 'Invalid OHLC numbers in CANDLE webhook' });
+        return;
+      }
+
+      const dateObj = new Date(time * 1000);
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).formatToParts(dateObj);
+      const partMap: Record<string, string> = {};
+      for (const p of parts) partMap[p.type] = p.value;
+      const sessionDate = `${partMap.year}-${partMap.month}-${partMap.day}`;
+      const istLabel = `${sessionDate} ${partMap.hour}:${partMap.minute} IST`;
+
+      const candleRecord: Candle = {
+        time,
+        istLabel,
+        sessionDate,
+        open,
+        high: Number.isFinite(high) ? high : Math.max(open, close),
+        low: Number.isFinite(low) ? low : Math.min(open, close),
+        close,
+        volume,
+      };
+
+      const cachePath = path.resolve(process.cwd(), 'data', 'historical_cache', `${symbol}_${tf}.json`);
+      let existingCandles: Candle[] = [];
+      try {
+        if (fs.existsSync(cachePath)) {
+          const parsed = JSON.parse(fs.readFileSync(cachePath, 'utf-8'));
+          if (Array.isArray(parsed.candles)) existingCandles = parsed.candles;
+        }
+      } catch {
+        existingCandles = [];
+      }
+
+      const filtered = existingCandles.filter((c) => c.time !== candleRecord.time);
+      filtered.push(candleRecord);
+      filtered.sort((a, b) => a.time - b.time);
+
+      try {
+        const cacheDir = path.dirname(cachePath);
+        if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+        fs.writeFileSync(
+          cachePath,
+          JSON.stringify({
+            metadata: {
+              symbol,
+              timeframe: tf,
+              provider: 'TRADINGVIEW_WEBHOOK_FEED',
+              updatedAt: new Date().toISOString(),
+              totalBars: filtered.length,
+            },
+            candles: filtered,
+          }),
+          'utf-8'
+        );
+      } catch (err) {
+        console.error('[TradingView Webhook] Cache write error:', err);
+      }
+
+      res.json({
+        success: true,
+        message: `Candle ingested for ${symbol} (${tf})`,
+        candle: candleRecord,
+        totalCachedBars: filtered.length,
+      });
+      return;
+    }
+
+    if (action === 'EXIT' || action === 'CLOSE' || action === 'FLATTEN') {
+      const account = closePaperPosition(state, symbol, 'TRADINGVIEW_WEBHOOK_EXIT');
+      notificationService.notifyExecution({
+        symbol,
+        side: 'SELL',
+        quantity: 0,
+        price: Number(body.price) || 0,
+        type: 'EXIT',
+        reason: 'TradingView Webhook Exit',
+      }).catch(() => {});
+      res.json({
+        success: true,
+        message: `Position for ${symbol} closed via TradingView alert webhook`,
+        symbol,
+        account,
+      });
+      return;
+    }
+
+    if (action === 'BUY' || action === 'SELL') {
+      const side = action as 'BUY' | 'SELL';
+      const refPrice = Number(body.price) || (STOCK_MAP.get(symbol)?.basePrice ?? 1000);
+      const defaultStop = side === 'BUY' ? refPrice * 0.99 : refPrice * 1.01;
+      const defaultTarget = side === 'BUY' ? refPrice * 1.015 : refPrice * 0.985;
+
+      const stopLoss = (body.stopLoss !== undefined && Number.isFinite(Number(body.stopLoss)))
+        ? Number(body.stopLoss)
+        : defaultStop;
+      const target = (body.target !== undefined && Number.isFinite(Number(body.target)))
+        ? Number(body.target)
+        : defaultTarget;
+      const quantity = (body.quantity !== undefined && Number.isFinite(Number(body.quantity)))
+        ? Math.max(1, Math.floor(Number(body.quantity)))
+        : undefined;
+      const limitPrice = (body.price !== undefined && Number.isFinite(Number(body.price)))
+        ? Number(body.price)
+        : undefined;
+
+      const result = submitPaperOrder(state, {
+        symbol,
+        side,
+        orderType: limitPrice ? 'LIMIT' : 'MARKET',
+        limitPrice,
+        stopLoss,
+        target,
+        quantity,
+        strategyName: String(body.strategyName || body.strategy || 'TradingView PineScript v5'),
+        regime: body.regime || 'STRONG_TREND_BULL',
+        dataQualityPassed: true,
+        modelValidated: true,
+        calibrationReliable: true,
+      });
+
+      const statusCode = result.decision.verdict === 'APPROVED' ? 201 : 403;
+      if (result.decision.verdict === 'APPROVED') {
+        notificationService.notifyTradeSignal({
+          symbol,
+          action: side,
+          price: refPrice,
+          stopLoss,
+          target,
+          confidence: Number(body.confidence || body.conviction || 65.0),
+          strategy: String(body.strategyName || body.strategy || 'TradingView PineScript v5'),
+          regime: body.regime || 'STRONG_TREND_BULL',
+          notes: String(body.notes || body.message || 'Signal approved & executed in ArthQuant'),
+        }).catch(() => {});
+      }
+      res.status(statusCode).json({
+        success: result.decision.verdict === 'APPROVED',
+        symbol,
+        action,
+        ...result,
+      });
+      return;
+    }
+
+    res.status(400).json({
+      error: `Invalid action '${action}'. Expected 'BUY', 'SELL', 'EXIT', or 'CLOSE'.`,
+    });
   });
 
   app.post('/api/paper/step', (_req: Request, res: Response) => {
@@ -1159,8 +1497,23 @@ async function startServer() {
       appType: 'spa',
     });
     app.use(vite.middlewares);
+    app.use('*', async (req: Request, res: Response, next: NextFunction) => {
+      if (req.originalUrl.startsWith('/api')) {
+        return next();
+      }
+      try {
+        const url = req.originalUrl;
+        const htmlPath = path.resolve(__dirname, 'index.html');
+        let template = fs.readFileSync(htmlPath, 'utf-8');
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
   } else {
-    const distDir = path.resolve(process.cwd(), 'dist');
+    const distDir = path.resolve(__dirname, 'dist');
     if (fs.existsSync(distDir)) {
       app.use(express.static(distDir));
       app.get('*', (_req: Request, res: Response) => {
@@ -1171,12 +1524,86 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`ArthQuant server listening on http://0.0.0.0:${PORT}`);
+    startMlProcessLifecycle();
   });
+}
+
+let mlChildProcess: ChildProcess | null = null;
+
+function startMlProcessLifecycle(): void {
+  const appPyPath = path.resolve(__dirname, 'ml_service', 'app.py');
+  if (!fs.existsSync(appPyPath)) return;
+
+  const pythonCandidates = [
+    process.env.PYTHON_BIN,
+    'C:\\Users\\OM\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe',
+    'C:\\Users\\OM\\AppData\\Local\\Python\\bin\\python.exe',
+    'python',
+    'py',
+  ].filter(Boolean) as string[];
+
+  const pythonBin = pythonCandidates.find((p) => (path.isAbsolute(p) ? fs.existsSync(p) : true)) || 'python';
+
+  console.log(`[ArthQuant] Starting ML Microservice on-demand (${pythonBin})...`);
+  try {
+    mlChildProcess = spawn(
+      pythonBin,
+      ['-m', 'uvicorn', 'ml_service.app:app', '--host', '127.0.0.1', '--port', '8000'],
+      {
+        cwd: __dirname,
+        stdio: 'inherit',
+        shell: false,
+      }
+    );
+
+    mlChildProcess.on('error', (err) => {
+      console.warn('[ArthQuant] Could not launch Python ML child process:', err.message);
+    });
+
+    mlChildProcess.on('exit', (code, signal) => {
+      if (signal !== 'SIGTERM' && signal !== 'SIGINT') {
+        console.log(`[ArthQuant] Python ML microservice exited (code: ${code}, signal: ${signal})`);
+      }
+      mlChildProcess = null;
+    });
+
+    const cleanup = () => {
+      if (mlChildProcess) {
+        console.log('[ArthQuant] App closing: Unloading ML models from memory & stopping microservice...');
+        try {
+          mlChildProcess.kill('SIGTERM');
+        } catch {
+          // ignore
+        }
+        mlChildProcess = null;
+      }
+    };
+
+    process.once('SIGINT', () => {
+      cleanup();
+      process.exit(0);
+    });
+    process.once('SIGTERM', () => {
+      cleanup();
+      process.exit(0);
+    });
+    process.once('exit', cleanup);
+  } catch (err) {
+    console.warn('[ArthQuant] Failed to spawn ML process:', err);
+  }
 }
 
 function parseTimeframe(val: unknown): Timeframe {
   if (val === '1m' || val === '5m' || val === '15m') return val;
   return '5m';
+}
+
+function constantTimeTokenMatch(provided: string | string[], expected: string): boolean {
+  const token = Array.isArray(provided) ? provided[0] || '' : provided;
+  const providedBuffer = Buffer.from(token);
+  const expectedBuffer = Buffer.from(expected);
+  return providedBuffer.length === expectedBuffer.length
+    && crypto.timingSafeEqual(providedBuffer, expectedBuffer);
 }
 
 function clampNum(val: unknown, min: number, max: number, fallback: number): number {
