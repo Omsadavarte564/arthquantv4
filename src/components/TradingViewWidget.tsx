@@ -7,10 +7,14 @@ interface TradingViewWidgetProps {
 }
 
 function resolveTradingViewSymbol(rawSymbol: string): string {
-  const s = rawSymbol.trim().toUpperCase();
-  if (s === 'NIFTY' || s === 'NIFTY 50' || s === 'NIFTY50') return 'NSE:NIFTY';
-  if (s === 'BANKNIFTY' || s === 'BANK NIFTY') return 'NSE:BANKNIFTY';
-  if (s === 'SENSEX') return 'BSE:SENSEX';
+  let s = rawSymbol.trim().toUpperCase();
+  if (s === 'RELIENCE' || s === 'NSE:RELIENCE' || s === 'RELIENCE.NS') {
+    s = 'RELIANCE';
+  }
+  if (s === 'NIFTY' || s === 'NIFTY 50' || s === 'NIFTY50' || s === '^NSEI') return 'NSE:NIFTY';
+  if (s === 'BANKNIFTY' || s === 'BANK NIFTY' || s === '^NSEBANK') return 'NSE:BANKNIFTY';
+  if (s === 'SENSEX' || s === '^BSESN') return 'BSE:SENSEX';
+  if (s === 'INDIAVIX' || s === '^INDIAVIX') return 'NSE:INDIAVIX';
   if (s.startsWith('NSE:') || s.startsWith('BSE:')) return s;
   return `NSE:${s}`;
 }
@@ -48,8 +52,9 @@ export const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({
       timezone: 'Asia/Kolkata',
       theme: darkMode ? 'dark' : 'light',
       style: '1',
-      locale: 'en',
+      locale: 'in',
       enable_publishing: false,
+      save_image: true,
       hide_side_toolbar: false,
       allow_symbol_change: true,
       calendar: false,
@@ -64,7 +69,7 @@ export const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({
   }, [symbol, darkMode, interval]);
 
   return (
-    <div className="w-full h-[540px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
+    <div className="w-full h-[580px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0F1623]">
       <div
         className="tradingview-widget-container"
         ref={containerRef}

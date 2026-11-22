@@ -1,3 +1,14 @@
+---
+title: ArthQuant Terminal
+emoji: 📈
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 5.20.0
+app_file: app.py
+pinned: false
+---
+
 # ArthQuant — AI-Powered Quantitative Intraday Trading Platform for Indian Stock Markets
 
 ArthQuant is a modular, research-backed quantitative trading terminal built for **NSE & BSE cash equity intraday trading**. It combines StockWise-style market intelligence, StrykeX-style no-code strategy composition, causal quantitative machine learning with probability calibration, no-lookahead event-driven backtesting with exact NSE statutory cost modeling, simulated paper trading, an independent deterministic risk-management gatekeeper, and SEBI-compliant broker integration readiness.

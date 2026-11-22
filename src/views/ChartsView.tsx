@@ -89,8 +89,11 @@ export function ChartsView({
 
   const handleLoadCustomSymbol = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleaned = customSymbolInput.trim().toUpperCase();
+    let cleaned = customSymbolInput.trim().toUpperCase();
     if (!cleaned) return;
+    if (cleaned === 'RELIENCE' || cleaned === 'RELIENCE.NS') {
+      cleaned = 'RELIANCE';
+    }
     onChangeSymbol(cleaned);
     setCustomSymbolInput('');
   };

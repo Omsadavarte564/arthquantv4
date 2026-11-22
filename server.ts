@@ -1500,6 +1500,9 @@ async function startServer() {
       if (req.originalUrl.startsWith('/api')) {
         return next();
       }
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.sendFile(path.join(distDir, 'index.html'));
     });
   } else {
@@ -1540,9 +1543,10 @@ function startMlProcessLifecycle(): void {
 
   const pythonCandidates = [
     process.env.PYTHON_BIN,
+    'python3',
+    'python',
     'C:\\Users\\OM\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe',
     'C:\\Users\\OM\\AppData\\Local\\Python\\bin\\python.exe',
-    'python',
     'py',
   ].filter(Boolean) as string[];
 
